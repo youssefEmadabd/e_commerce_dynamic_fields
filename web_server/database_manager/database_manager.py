@@ -36,6 +36,19 @@ class DatabaseManager:
             }
         }
 
+    def get_products(self) -> Tuple[list, bool]:
+        """
+        Retrieves all products from the in-memory database.
+
+        Returns:
+            Tuple[list, bool]: A tuple of the list of products and a boolean indicating if retrieval was successful.
+        """
+        products = self.database_dict.get(TableNames.PRODUCTS.value)
+        if not products:
+            return [], False
+
+        return list(products.values()), True
+
     def get_product(self, product_id: str) -> Tuple[dict, bool]:
         """
         Retrieves a product from the in-memory database based on the product id.

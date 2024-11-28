@@ -1,14 +1,30 @@
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from helper import create_access_token, is_valid_password
 from database_manager.constants import UserKeys
 from database_manager.database_manager import DatabaseManager
 from decorators.authentication_decorator import protected
 
+# Define the allowed origins
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+    "https://example.com",
+]
+
 # FastAPI Initialization
 app = FastAPI()
 database_manager = DatabaseManager()
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.post("/product/")
 @protected
 async def create_product(request: Request):
@@ -47,6 +63,20 @@ async def get_product(product_id: str, request: Request):
     product, status = database_manager.get_product(product_id)
     if not status:
         raise HTTPException(status_code=404, detail="Product not found.")
+
+    return product
+
+@app.get("/product/")
+@protected
+async def get_product(request: Request):
+    """
+    Get the product.
+    
+    example id: generic_id
+    """
+    product, status = database_manager.get_products()
+    if not status:
+        raise HTTPException(status_code=404, detail="No products found")
 
     return product
 
